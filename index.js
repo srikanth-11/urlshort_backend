@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: "*",
+    origin: "https://sri-ur1shortner.netlify.app",
   })
 );
 
