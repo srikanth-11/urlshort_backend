@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const shortid = require("shortid");
@@ -6,6 +7,7 @@ const mongodb = require("mongodb");
 const MongoClient = mongodb.MongoClient;
 const cors = require("cors");
 const valid_url = require("valid-url");
+var jwt = require("jsonwebtoken")
 
 const app = express();
 const url =
