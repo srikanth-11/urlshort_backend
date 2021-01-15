@@ -20,7 +20,36 @@ app.use(
   })
 );
 
-app.post("/shorten-url", async (req, res) => {
+function authenticate(req, res, next) {
+  if (req.headers.authorization) {
+
+      jwt.verify(req.headers.authorization, process.env.JWT_TOKEN, function (err, data) {
+          if (data) {
+              if (data.userid) {
+                  req.body.userid = data.userid
+                  req.body.email = data.email
+                  next()
+              } else {
+                  res.status(401).json({
+                      message: "Not Authorized"
+                  })
+              }
+
+          } else {
+              res.status(400).json({
+                  message: "Invalid Token"
+              })
+          }
+      })
+  } else {
+      res.status(400).json({
+          messsage: "No Token Present"
+      })
+  }
+}
+
+
+app.post("/shorten-url", authenticate,async (req, res) => {
   console.log(req.body);
 
   //create connection for client
@@ -39,8 +68,11 @@ app.post("/shorten-url", async (req, res) => {
         } else {
           //shorten and insert the url in db
           let url = req.body.url;
+          let email = req.body.email
           let db = connection.db(dbName);
-          let urlData = await db.collection("url").findOne({ url: url });
+          let urlData = await db.collection("url").findOne({
+            $and: [{ url: url }, { email: email }]
+        });
           if (urlData) {
             res.json({
               message: "Shortern Url Already Exists",
@@ -113,13 +145,13 @@ app.get("/redirect-url/:shortUrl", async (req, res) => {
 });
 
 // get all url details for the user
-app.get("/url-data", async (req, res) => {
+app.get("/url-data",authenticate, async (req, res) => {
   //create connection
   let connection = await MongoClient.connect(url, { useUnifiedTopology: true });
   try {
     // fetch all the url details
     let db = connection.db(dbName);
-    let urlData = await db.collection("url").find().toArray();
+    let urlData = await db.collection("url").find({ email: req.body.email }).toArray();
     res.json({
       message: "Url details fetched successfully",
       data: urlData,
