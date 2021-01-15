@@ -81,6 +81,7 @@ app.post("/shorten-url", authenticate,async (req, res) => {
           } else {
             let shortUrl = shortid.generate();
             let urlData = {
+              email:req.body.email,
               url,
               shortUrl,
               clicks: 0,
