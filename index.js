@@ -154,7 +154,7 @@ app.get("/url-data",authenticate, async (req, res) => {
   try {
     // fetch all the url details
     let db = connection.db(dbName);
-    let urlData = await db.collection("url").find().toArray();
+    let urlData = await db.collection("url").find({email:req.body.email}).toArray();
     res.json({
       message: "Url details fetched successfully",
       data: urlData,
