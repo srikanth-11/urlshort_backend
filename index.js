@@ -54,6 +54,47 @@ function authenticate(req, res, next) {
   }
 }
 
+app.post("/login", async (req, res) => {
+  let connection = await MongoClient.connect(url, { useUnifiedTopology: true });
+  try {
+    let db = connection.db(dbName);
+    let user = await db.collection("users").findOne({ email: req.body.email });
+    if (user) {
+      let isUserAuthenticated = await bycrypt.compare(
+        req.body.password,
+        user.password
+      );
+      if (isUserAuthenticated) {
+
+        
+          let token = jwt.sign({ userid: user._id, email: user.email }, process.env.JWT_TOKEN, { expiresIn: "1h" });
+          res.json({
+              message: 'User Authenticated Successfully',
+              token,
+              data: {
+                  email: user.email
+              }
+          })
+       
+      } else {
+        res.status(400).json({
+          message: "Password is wrong for the provided email",
+        });
+      }
+    } else {
+      res.status(400).json({
+        message: "Entered Email does not exists",
+      });
+    }
+  } catch (err) {
+    res.status(400).json({
+      message: "Unable to login please enter valid credentials",
+    });
+  } finally {
+    connection.close();
+  }
+});
+
 
 app.post("/shorten-url", authenticate,async (req, res) => {
   console.log(req.body);
