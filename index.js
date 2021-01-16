@@ -24,9 +24,11 @@ app.use(
 
 function authenticate(req, res, next) {
   if (req.headers.authorization) {
+    console.log(req.headers.authorization)
 
       jwt.verify(req.headers.authorization, process.env.JWT_TOKEN, function (err, data) {
           if (data) {
+            console.log(data)
               if (data.userid) {
                   req.body.userid = data.userid
                   req.body.email = data.email
@@ -149,6 +151,7 @@ app.get("/redirect-url/:shortUrl", async (req, res) => {
 
 // get all url details for the user
 app.get("/url-data",authenticate, async (req, res) => {
+  console.log(req.body)
   //create connection
   let connection = await MongoClient.connect(url, { useUnifiedTopology: true });
   try {
