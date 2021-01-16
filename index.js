@@ -27,6 +27,7 @@ function authenticate(req, res, next) {
     console.log(req.headers.authorization)
 
       jwt.verify(req.headers.authorization, process.env.JWT_TOKEN, function (err, data) {
+        if(err) throw err
           if (data) {
             console.log(data)
               if (data.userid) {
